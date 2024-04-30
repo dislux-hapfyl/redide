@@ -9,3 +9,5 @@ red-lang ide made in pnk.lang
 Depends: redc, pnk.lang
 
 Get Red: https://github.com/red/red
+
+Get pnk.lang: https://github.com/dislux-hapfyl/shimky
