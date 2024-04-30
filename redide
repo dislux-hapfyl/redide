@@ -1,0 +1,236 @@
+. pnk.lang
+
+ct=SrcPad
+wa=srcTxt
+wb=comEntry
+wc=ShOut
+M=master
+
+aa='fg="#DDD"'
+abc='blockcursor=True'
+bb='bg="#222"'
+bd=bg=$bg
+ea='cursor="shuttle"'
+ee='cursor="pencil"'
+fa='font=("VictorMono",16)'
+hh='highlightbackground="#444"'
+ia='highlightcolor="#2BCDBB"'
+ib='highlightcolor="#222"'
+jc='insertbackground="red"'
+kk='relief="flat"'
+ll='padx=20'
+mm='pady=20'
+uu='undo=True'
+wr='wrap="word"'
+
+opta=$aa,$abc,$bb,$ee,$fa,$hh,$ia,$jc,$kk,$ll,$mm,$uu,$wr
+optb=$aa,$bd,$ea,$fa,$hh,$ib,$jc,$kk
+
+
+ZDshebang 
+ZDfrm tkinter Tk,Frame,Text,Entry,PanedWindow
+ZDfrm re finditer
+ZDfrm threading Thread
+ZDimp subprocess
+ZDimp datetime
+
+
+ZFtoorwin Red
+
+XFpnwin pw '"horizontal"'
+XFpk pw 1 both
+
+XFfc z run
+
+XFbinda Control-r run
+
+
+YDdefe run
+XIcv app App
+XFfc zz pw.add app
+
+
+ZDcld App
+XIcv i$ct $ct
+XFpk i$ct 1 both
+
+
+ZDcld $ct
+
+XIcv $wa Text $opta
+
+XFpk $wa 1 both
+
+XFbind $wa KeyRelease doSyntax
+XFbind $wa Control-l cleartxt
+XFbind $wa Escape myExit
+
+
+XIcv $wb Entry $optb
+XFpk $wb 0 x
+
+XFbind $wb Return cliSh
+XFbind $wb Escape cliclr
+
+
+XFfc z tagConf
+XFfc z myExit
+
+
+YDdefp thdStart x
+XIv z x x
+XIfv - thd Thread 'target=x,daemon=True'
+XFfc - thd.start
+
+
+YDdefe cliclr
+XFedel $wb
+
+
+YDdefe myExit
+XFfc z $wb.focus
+
+
+YDdefe cliSh
+XIeget $wb line
+XIfv - tt line.split
+
+XKif 'not tt'
+WKps 
+
+XKread() {
+	local p="$1"
+	XKelif "tt[0] == \"$p\""
+}
+
+
+XKread o
+WFfc z openfile
+
+XKread w
+WFfc z savefile
+
+XKread d
+WFfc z cleartxt
+WFfc z cliclr
+
+XKread c
+WFfc z compile
+
+XKread s
+WFfc z mapitOut
+
+XIgetfilenm() {
+	XIeget $wb line
+	XIfv - f line.split
+	XIv z file 'f[1]'
+}
+
+YDdefe clearOut
+XFfc z i$wc.destroy 
+XFfc z $wb.focus
+
+
+YDdefe compile
+XFfc zz thdStart redc
+
+
+YDdefe mapitOut
+XFfc zz thdStart shell
+
+
+YDdefe shell
+XIeget $wb line
+XIfv - tt line.split
+XIv - cmd '" ".join( str(i) for i in tt[1:])'
+XIcv i$wc $wc
+XFpl i$wc 30 30
+XFbind i$wc.txt Escape clearOut
+XFfc z i$wc.txt.focus
+XFshspp i$wc.txt 'f"{cmd}"'
+
+
+YDdefe redc
+XFfc z cliclr
+XIcv i$wc $wc
+XFpl i$wc 30 30
+XFeins $wb '"Compiling...Please Wait!"'
+XFbind i$wc.txt Escape clearOut
+XFfc z i$wc.txt.focus
+XFshspp i$wc.txt 'f"redc -c {self.file} > .out ; cat .out ; rm .out"'
+XFfc z cliclr
+
+
+YDdefe openfile
+XIgetfilenm
+XFfc z cleartxt
+XFopft $wa 'f[1]'
+XFfc z doSyntax
+
+
+YDdefe savefile
+XIgetfilenm
+XItgeta $wa data 
+XFwrtf data 'f[1]'
+XFfc z doSyntax
+
+
+YDdefe cleartxt
+XFtdel $wa 1.0 end
+
+
+YDdefe doSyntax
+XFfc zz syntax $wa
+
+
+YDdefe tagConf
+XIv - d '{ "arg": ("#333", "#eccca2"), "args": ("#444", "#eccca2"), "brc": ("#222", "red"), "brcc": ("#222", "pink"), "paren": ("#222", "green"), "slash": ("#222", "orange"), "parenn": ("#222", "green"), "crlb": ("#444", "#eccca2"), "hash": ("#222", "magenta"), "col": ("#222", "#00ffff"), "eql": ("#222", "#00ffff"),"dash": ("#222", "yellow"),"dot": ("#222", "#bfff00"), "pls": ("#222", "yellow"), "star": ("#222", "#bfff00"), "qs": ("#222", "#bfff00"), "dol": ("#222", "green"), "exc": ("#222", "orange"), "nnn": ("#222","purple"),}'
+XLffor key,value d.items
+WFtagcfg $wa key value[0] value[1]
+
+
+YDdefp tagg x,y,a,b
+XIv z x x
+XIv z y y
+XIv z a a
+XIv z b b
+XFfc z x.tag_add 'y,f"1.0+{a}c",f"1.0+{b}c"'
+
+
+YDdefp syntax xx
+XIv z xx xx
+XItgeta xx data
+
+XIFfind() {
+	local n="$1"
+	local p="$2"
+	XIv - ${n}_idx "[(m.start(),m.end()) for m in finditer(r'$p', data)]"
+	XLfor start,end ${n}_idx
+	WFfc z tagg "xx,\"$n\",start,end"
+}
+
+XIFfind args '\"(.*?)\"'
+XIFfind arg "\'"
+XIFfind crlb '\{(.*?)\}'
+XIFfind brc '\['
+XIFfind paren '\('
+XIFfind parenn '\)'
+XIFfind slash '\/'
+XIFfind brcc '\]'
+XIFfind hash '#'
+XIFfind col ':'
+XIFfind dash '-'
+XIFfind eql '='
+XIFfind pls '\+'
+XIFfind star '\*'
+XIFfind dot '\.'
+XIFfind qs '\?'
+XIFfind dol '\$'
+XIFfind exc '!'
+XIFfind nnn '~'
+
+ZDcld $wc
+XIcv txt Text $opta
+XFpk txt 0 none
+
+ZFmain Red red-ide
