@@ -6,6 +6,6 @@ red-lang ide made in pnk.lang
 
 - Compiles
 
-Depends: redc 
+Depends: redc, pnk.lang
 
 Get Red: https://github.com/red/red
