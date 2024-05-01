@@ -34,7 +34,7 @@ class Console(Frame):
         super().__init__(parent, )
         self.master = parent
         self.configure(bg="#202124")
-        self.ttyText = Text(self,fg="#DDD",blockcursor=True,bg="#222",cursor="pencil",font=("VictorMono",16),highlightbackground="#444",highlightcolor="#2BCDBB",insertbackground="red",relief="flat",padx=20,pady=20,wrap="word",height=18)
+        self.ttyText = Text(self,fg="#DDD",blockcursor=True,bg="#222",cursor="heart",font=("VictorMono",16),highlightbackground="#444",highlightcolor="#2BCDBB",insertbackground="red",relief="flat",padx=20,pady=20,wrap="word",height=18)
         self.tagConf()
         self.ttyText.bind("<Return>", self.enter)
         self.ttyText.bind("<KeyRelease>", self.doSyntax)
