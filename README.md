@@ -6,8 +6,6 @@ red-lang ide made in pnk.lang
 
 - Compiles
 
-- Live REPL (Doesnt handle multiple-line paste)
-
 Depends: redc, pnk.lang
 
 Get Red: https://github.com/red/red
