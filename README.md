@@ -13,3 +13,5 @@ Depends: redc, pnk.lang
 Get Red: https://github.com/red/red
 
 Get pnk.lang: https://github.com/dislux-hapfyl/shimky
+
+_I provided the raw Python file so no need for pnk.lang_
