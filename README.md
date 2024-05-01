@@ -6,7 +6,7 @@ red-lang ide made in pnk.lang
 
 - Compiles
 
-- Live REPL Intepreter
+- Live REPL (Doesnt handle multiple-line paste)
 
 Depends: redc, pnk.lang
 
