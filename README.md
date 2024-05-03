@@ -43,7 +43,7 @@ Internal Commands are singel character:  `d c o w s`
 
 *Middle Button Click* Paste the Yank [Yanking and Copying text are 2 different things. To Yank: Highlight text anywhere outside of app or a different pad *(Ctrl-R)* and with Mouse Scroll-wheel click it and you will "Paste" the text [yank].)
 
-*Middle Button Click Drag* Scrolls Up/Down
+*Wheel Click Drag* Scrolls Up/Down
 
 _**Ctrl**-a,e,d,t,n,p,i,b,f,c,v,x,/_ Default POSIX Bindings by Tkinter: move to begin line, line end, delete, transpose, next parg, prev parg, insert tab, back char, fwd char, copy, paste, cut, select all, respectively.
 
