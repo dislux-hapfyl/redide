@@ -18,7 +18,7 @@ The red interpreter and compiler should be in your path named `red` and `redc`. 
 
 `python3 red.py` Launch app
 
-*Ctrl-R* Creates new workarea. Watch for the dark bar appear on the right. Dual side arrow cursor appears clik and drag. Resizable workspace.
+*Ctrl-R* Creates new workarea. Watch for the dark bar appear on the right. Dual side arrow cursor appears clik and drag to pane window.
 
 Internal Commands are singel character:  `o w c s d`
 
