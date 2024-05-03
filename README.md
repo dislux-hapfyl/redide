@@ -47,6 +47,10 @@ Internal Commands are singel character:  `d c o w s`
 
 _**Ctrl**-a,e,d,t,n,p,i,b,f,c,v,x,/_ Default POSIX Bindings by Tkinter: move to begin line, line end, delete, transpose, next parg, prev parg, insert tab, back char, fwd char, copy, paste, cut, select all, respectively.
 
+[quirk: move/place cursor on the last line first before entering commands into the Red interpreter window]
+
+I can fix all the hacks as I get better with Python.
+
 ---
 
 Get Red: https://github.com/red/red
