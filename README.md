@@ -20,21 +20,22 @@ The red interpreter and compiler should be in your path named `red` and `redc`. 
 
 *Ctrl-R* Creates new workarea. Watch for the dark bar appear on the right. Dual side arrow cursor appears clik and drag to pane window.
 
-Internal Commands are singel character:  `o w c s d`
+Internal Commands are singel character:  `d c o w s` 
+
+*Return* execute internal commands
+
+`d` clear all
 
 `c` compile opened or saved file
 
-`s [linux command]` runs shell `s ls -t`
+`o [filename]` opens a file in current path
+
+`w [filename]` writes a file to current path
+
+`s [linux command]` runs shell `s ls -t` (Shell does not maintain state, so `cd dir; [do stuff]`) Its just a subprocess for you to get text manipulation access using linux commands `awk,sed,grep`. I just edit files like that instead of using vim or emacs. Call me a purist.
 
 *Escape* removes shell window. 
 
-`o [file in present path]` opens file in current path
-
-`w [filename]` writes a filename to current path
-
-`d` deletes all inside the text pad above command line
-
-*Return* execute command
 
 *Escape* clear command line 
 
