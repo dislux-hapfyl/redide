@@ -12,7 +12,7 @@ red-lang ide made in Python
 
 Depends: red, redc, bash
 
-The red interpreter and compiler should be in your path named `red` and `redc`. Mine is in `/usr/local/bin/` and also `Bash` is required if you wan access to the internal shell. *You can edit the subprocess code in the file to your shell of preference.* `sed -i 's|"/bin/bash"|"/your/shell"|g red.py'`
+The red interpreter and compiler should be in your path named `red` and `redc`. Mine is in `/usr/local/bin/` and also `Bash` is required if you wan access to the internal shell. *You can edit the subprocess code in the file to your shell of preference.* `sed -i 's|"/bin/bash"|"/your/shell"|g' red.py`
 
 #HOWTO
 
