@@ -22,7 +22,7 @@ The red interpreter and compiler should be in your path named `red` and `redc`. 
 
 Internal Commands are singel character:  `d c o w s` 
 
-*Return* execute internal commands
+*Return/Enter* execute internal commands
 
 `d` clear all
 
