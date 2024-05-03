@@ -32,7 +32,7 @@ Internal Commands are singel character:  `d c o w s`
 
 `w [filename]` writes a file to current path
 
-`s [linux command]` runs shell `s ls -t` (Shell does not maintain state, so `s cd dir; [do stuff]`) Its just a subprocess for you to get text manipulation access using linux commands `s cat file | sed this | grep that`. I just edit files like that instead of using vim or emacs. Call me a purist.
+`s [linux command]` runs shell `s ls -t` (Shell does not maintain state, so `s cd dir; [do stuff]`) Its just a subprocess for you to get text manipulation access using linux commands `s cat file | sed this | grep that`. I just edit files like that instead of using vim or emacs. Call me a [purist](https://adamdrake.com/command-line-tools-can-be-235x-faster-than-your-hadoop-cluster.html).
 
 *Escape* removes shell window. 
 
