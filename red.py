@@ -37,35 +37,40 @@ class Console(Frame):
         self.ttyText = Text(self,fg="#DDD",blockcursor=True,bg="#222",cursor="pencil",font=("VictorMono",16),highlightbackground="#444",highlightcolor="#2BCDBB",insertbackground="red",relief="flat",padx=20,pady=20,wrap="word",height=18)
         self.tagConf()
         self.ttyText.bind("<Return>", self.enter)
-        self.ttyText.bind("<KeyRelease>", self.doSyntax)
         self.ttyText.pack(expand=1,fill="both",padx=3,pady=3,)
         self.p = subprocess.Popen(com,stdout=subprocess.PIPE,stdin=subprocess.PIPE,stderr=subprocess.PIPE)
         self.outQueue = queue.Queue()
         self.errQueue = queue.Queue()
         self.linestart = 0
         self.alive = True
-        Thread(target=self.readFromProccessOut).start()
-        Thread(target=self.readFromProccessErr).start()
+        Thread(target=self.readFromProccessOut,daemon=True).start()
+        Thread(target=self.readFromProccessErr,daemon=True).start()
         self.writeLoop()
+
     def destroy(self,event=None):
         self.alive = False
         self.p.stdin.write("exit()\n".encode())
         self.p.stdin.flush()
         self.ttyText.destroy()
         Frame.destroy(self)
+
     def enter(self,e):
+        self.doSyntax()
         string = self.ttyText.get(1.0,"end")[self.linestart:]
         self.linestart += len(string)
         self.p.stdin.write(string.encode())
         self.p.stdin.flush()
+
     def readFromProccessOut(self,):
         while self.alive:
            data = self.p.stdout.raw.read(1024).decode()
            self.outQueue.put(data)
+
     def readFromProccessErr(self,):
         while self.alive:
            data = self.p.stderr.raw.read(1024).decode()
            self.errQueue.put(data)
+
     def writeLoop(self,):
         if not self.errQueue.empty():
            self.write(self.errQueue.get())
@@ -73,22 +78,27 @@ class Console(Frame):
            self.write(self.outQueue.get())
         if self.alive:
            self.after(10,self.writeLoop)
+
     def write(self,string):
         self.ttyText.insert("end", f"{string}")
         self.ttyText.see("end")
         self.linestart += len(string)
+
     def doSyntax(self,e=None):
         self.syntax(self.ttyText)
+
     def tagConf(self,e=None):
         d = { "arg": ("#333", "#eccca2"), "args": ("#444", "#eccca2"), "brc": ("#222", "red"), "brcc": ("#222", "blue"), "paren": ("#222", "orange"), "slash": ("#222", "green"), "parenn": ("#222", "yellow"), "crlb": ("#444", "#eccca2"), "hash": ("#222", "magenta"), "col": ("#222", "#00ffff"), "eql": ("#222", "#00ffff"),"dash": ("#222", "#00ffff"), "pls": ("#222", "yellow"), "star": ("#222", "#bfff00"), "qs": ("#222", "#bfff00"), "dol": ("#222", "green"), "exc": ("#222", "orange"), "nnn": ("#222","orange"),"pct": ("#222","purple"),}
         for key,value in d.items():
             self.ttyText.tag_configure(key,background=value[0],foreground=value[1])
+
     def tagg(self,x,y,a,b,e=None):
         self.x = x
         self.y = y
         self.a = a
         self.b = b
         self.x.tag_add(y,f"1.0+{a}c",f"1.0+{b}c")
+
     def syntax(self,xx,e=None):
         self.xx = xx
         data = self.xx.get("1.0","end-1c")
@@ -157,7 +167,8 @@ class SrcPad(Frame):
         self.configure(bg="#202124")
         self.srcTxt = Text(self,fg="#DDD",blockcursor=True,bg="#222",cursor="pencil",font=("VictorMono",16),highlightbackground="#444",highlightcolor="#2BCDBB",insertbackground="red",relief="flat",padx=20,pady=20,undo=True,wrap="word")
         self.srcTxt.pack(expand=1,fill="both",padx=5,pady=5,)
-        self.srcTxt.bind("<Return>", self.synThd)
+        self.srcTxt.bind("<Shift_R>", self.synThd)
+        self.srcTxt.bind("<Shift-Return>", self.add_indent)
         self.srcTxt.bind("<Control-l>", self.cleartxt)
         self.srcTxt.bind("<Escape>", self.myExit)
         self.comEntry = Entry(self,fg="#DDD",bg="#202124",cursor="shuttle",font=("VictorMono",16),highlightbackground="#444",highlightcolor="#222",insertbackground="red",relief="flat")
@@ -166,9 +177,18 @@ class SrcPad(Frame):
         self.comEntry.bind("<Escape>", self.cliclr)
         self.tagConf()
         self.myExit()
+
+    def add_indent(self, event):
+        text = self.srcTxt
+        line = text.get("insert linestart", "insert")
+        match = re.match(r"^(\s+)", line)
+        whitespace = match.group(0) if match else ""
+        text.insert("insert", f"\n{whitespace}")
+        return "break"
+
     def thdStart(self,x,e=None):
         self.x = x
-        thd = Thread(target=x,daemon=True)
+        thd = Thread(target=x)
         thd.start()
     def cliclr(self,e=None):
         self.comEntry.delete(0,"end")
@@ -221,7 +241,8 @@ class SrcPad(Frame):
         self.iShOut.txt.bind("<Escape>", self.clearOut)
         self.iShOut.txt.focus()
         try:
-            result = subprocess.run(f"redc -c {self.file} > .out ; cat .out",shell=True,executable="/bin/bash",stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+            result = subprocess.run(f"redc -c {self.file} > .out ; cat .out",
+                                    shell=True,executable="/bin/bash",stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
             if result.returncode == 0:
                 self.iShOut.txt.insert("end",f"\n\n{result.stdout}\n")
             else:
@@ -229,7 +250,7 @@ class SrcPad(Frame):
         except Exception as e:
             self.iShOut.txt.insert("end",f"#$%&*^ #$%&*^ {datetime.datetime.now().strftime('<%m.%d.%Y.%H:%M>')} {str(e)}\n")
         self.iShOut.txt.insert("end",f"{datetime.datetime.now().strftime('<%m.%d.%Y.%H:%M>')} Done!\n")
-   
+
     def openfile(self,e=None):
         line = self.comEntry.get()
         f = line.split()
@@ -239,6 +260,7 @@ class SrcPad(Frame):
         thefile = f.read()
         self.srcTxt.insert("1.0", thefile)
         self.synThd()
+
     def savefile(self,e=None):
         line = self.comEntry.get()
         f = line.split()
@@ -247,22 +269,34 @@ class SrcPad(Frame):
         with open(f[1], "w") as file:
             file.write(data)
         self.synThd()
+
     def cleartxt(self,e=None):
         self.srcTxt.delete("1.0","end")
+
+    def remTag(self,e=None):
+        for tag in self.srcTxt.tag_names():
+            self.srcTxt.tag_remove(tag, "1.0", "end")
+        self.tagConf()
+
     def synThd(self,e=None):
+        self.remTag()
         self.thdStart(self.doSyntax)
+
     def doSyntax(self,e=None):
         self.syntax(self.srcTxt)
+
     def tagConf(self,e=None):
         d = { "arg": ("#333", "#eccca2"), "args": ("#444", "#eccca2"), "brc": ("#222", "red"), "brcc": ("#222", "blue"), "paren": ("#222", "orange"), "slash": ("#222", "green"), "parenn": ("#222", "yellow"), "crlb": ("#444", "#eccca2"), "hash": ("#222", "magenta"), "col": ("#222", "#00ffff"), "eql": ("#222", "#00ffff"),"dash": ("#222", "#00ffff"),"larr": ("#222", "red"),"rarr": ("#222", "blue"), "pls": ("#222", "#bfff00"), "star": ("#222", "#bfff00"), "qs": ("#222", "#bfff00"), "dol": ("#222", "green"), "exc": ("#222", "orange"), "nnn": ("#222","orange"), "pct": ("#222","purple"), "smcl": ("#222", "#bfff00"), "dot": ("#222", "pink"), "cm": ("#222", "cyan"), "upar": ("#222", "cyan"), "spc": ("#333", "#333"),}
         for key,value in d.items():
             self.srcTxt.tag_configure(key,background=value[0],foreground=value[1])
+
     def tagg(self,x,y,a,b,e=None):
         self.x = x
         self.y = y
         self.a = a
         self.b = b
         self.x.tag_add(y,f"1.0+{a}c",f"1.0+{b}c")
+
     def syntax(self,xx,e=None):
         self.xx = xx
         data = self.xx.get("1.0","end-1c")
@@ -353,6 +387,7 @@ class ShOut(Frame):
         super().__init__(parent,)
         self.master = parent
         self.configure(bg="#202124")
+
         self.txt = Text(self,fg="#DDD",blockcursor=True,bg="#222",cursor="pencil",font=("VictorMono",16),highlightbackground="#444",highlightcolor="#2BCDBB",insertbackground="red",relief="flat",padx=20,pady=20,undo=True,wrap="word")
         self.txt.pack(expand=0,fill="none",padx=5,pady=5,)
 
