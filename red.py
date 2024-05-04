@@ -432,4 +432,3 @@ if __name__ == '__main__':
     go.title("red-ide")
     go.mainloop()
 
-
