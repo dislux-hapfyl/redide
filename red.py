@@ -45,11 +45,11 @@ class Console(Frame):
 
         self.ttyText = Text(self,fg="#DDD",blockcursor=True,bg="#222",cursor="pencil",
                             font=("VictorMono",16),highlightbackground="#444",highlightcolor="#2BCDBB",
-                            insertbackground="red",relief="flat",padx=20,pady=20,wrap="word",height=18)
+                            insertbackground="red",relief="flat",padx=20,pady=20,wrap="word",height=18,width=132)
+        self.ttyText.pack(expand=1,fill="y",padx=5,pady=5,)
         self.tagConf()
         self.ttyText.bind("<Return>", self.enter)
         self.ttyText.bind("<KeyRelease>", self.doSyntax)
-        self.ttyText.pack(expand=1,fill="both",padx=3,pady=3,)
         self.p = subprocess.Popen(com,stdout=subprocess.PIPE,stdin=subprocess.PIPE,stderr=subprocess.PIPE)
         self.outQueue = queue.Queue()
         self.errQueue = queue.Queue()
@@ -89,7 +89,6 @@ class Console(Frame):
            self.write(self.outQueue.get())
         if self.alive:
            self.after(10,self.writeLoop)
-
 
     def write(self,string):
         self.ttyText.insert("end", f"{string}")
@@ -180,8 +179,8 @@ class SrcPad(Frame):
 
         self.srcTxt = Text(self,fg="#DDD",blockcursor=True,bg="#222",cursor="pencil",
                            font=("VictorMono",16),highlightbackground="#444",highlightcolor="#2BCDBB",
-                           insertbackground="red",relief="flat",padx=20,pady=20,undo=True,wrap="word")
-        self.srcTxt.pack(expand=1,fill="both",padx=5,pady=5,)
+                           insertbackground="red",relief="flat",padx=20,pady=20,undo=True,wrap="word",width=132)
+        self.srcTxt.pack(expand=1,fill="y",padx=5,pady=5,)
 
         self.srcTxt.bind("<Shift_R>", self.synThd)
         self.srcTxt.bind("<Shift-Return>", self.add_indent)
@@ -189,9 +188,9 @@ class SrcPad(Frame):
         self.srcTxt.bind("<Control-l>", self.cleartxt)
         self.srcTxt.bind("<Escape>", self.myExit)
 
-        self.comEntry = Entry(self,fg="#DDD",bg="#202124",cursor="shuttle",font=("VictorMono",16),
+        self.comEntry = Entry(self,fg="#DDD",bg="#202124",cursor="shuttle",font=("VictorMono",16), width=132,
                               highlightbackground="#444",highlightcolor="#222",insertbackground="red",relief="flat")
-        self.comEntry.pack(expand=0,fill="x",padx=5,pady=5,)
+        self.comEntry.pack(expand=0,fill="none",padx=5,pady=5,)
 
         self.comEntry.bind("<Return>", self.cliSh)
         self.comEntry.bind("<Escape>", self.cliclr)
@@ -260,32 +259,29 @@ class SrcPad(Frame):
         self.iShOut.place(x=30,y=30)
         self.iShOut.txt.bind("<Escape>", self.clearOut)
         self.iShOut.txt.focus()
+        self.subps(cmd, "1.0")
+
+    def subps(self,cmd,idx,e=None):
+        self.cmd = cmd
+        self.idx = idx
         try:
             result = subprocess.run(f"{cmd}",shell=True,executable="/bin/bash",stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
             if result.returncode == 0:
-                self.iShOut.txt.insert("1.0",f"\n\n{result.stdout}\n")
+                self.iShOut.txt.insert(f"{idx}",f"\n\n{result.stdout}\n")
             else:
-                self.iShOut.txt.insert("1.0",f"#$%&*^ #$%&*^ {datetime.datetime.now().strftime('<%m.%d.%Y.%H:%M>')} {result.stderr}\n")
+                self.iShOut.txt.insert(f"{idx}",f"#$%&*^  {datetime.datetime.now().strftime('<%m.%d.%Y.%H:%M>')} {result.stderr}\n")
         except Exception as e:
-            self.iShOut.txt.insert("1.0",f"#$%&*^ #$%&*^ {datetime.datetime.now().strftime('<%m.%d.%Y.%H:%M>')} {str(e)}\n")
+            self.iShOut.txt.insert(f"{idx}",f"#$%&*^ {datetime.datetime.now().strftime('<%m.%d.%Y.%H:%M>')} {str(e)}\n")
 
     def redc(self,e=None):
+        cmd = f"redc -c {self.file} > .out ; cat .out"
         self.cliclr()
         self.iShOut = ShOut(self,)
         self.iShOut.place(x=30,y=30)
-        self.iShOut.txt.insert("1.0",f"{datetime.datetime.now().strftime('<%m.%d.%Y.%H:%M>')} Compiling...Please Wait!\n")
+        self.iShOut.txt.insert("1.0",f"#$%&*^ {datetime.datetime.now().strftime('<%m.%d.%Y.%H:%M>')} Compiling...Please Wait!\n")
         self.iShOut.txt.bind("<Escape>", self.clearOut)
         self.iShOut.txt.focus()
-        try:
-            result = subprocess.run(f"redc -c {self.file} > .out ; cat .out",
-                                    shell=True,executable="/bin/bash",stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
-            if result.returncode == 0:
-                self.iShOut.txt.insert("end",f"\n\n{result.stdout}\n")
-            else:
-                self.iShOut.txt.insert("end",f"#$%&*^ #$%&*^ {datetime.datetime.now().strftime('<%m.%d.%Y.%H:%M>')} {result.stderr}\n")
-        except Exception as e:
-            self.iShOut.txt.insert("end",f"#$%&*^ #$%&*^ {datetime.datetime.now().strftime('<%m.%d.%Y.%H:%M>')} {str(e)}\n")
-        self.iShOut.txt.insert("end",f"{datetime.datetime.now().strftime('<%m.%d.%Y.%H:%M>')} Done!\n")
+        self.subps(cmd, "end")
 
     def openfile(self,e=None):
         line = self.comEntry.get()
