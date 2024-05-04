@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 #pnk.lang.gen;
 from tkinter import Tk,Frame,Text,Entry,PanedWindow
-from re import finditer
+from re import finditer,match
 from threading import Thread
 import queue
 import subprocess
 import datetime
+
+
 class Red(Tk):
+
     def __init__(self):
         super().__init__()
         self.configure(bg="#202124")
@@ -15,9 +18,12 @@ class Red(Tk):
         self.pw.pack(expand=1,fill="both",padx=5,pady=5,)
         self.run()
         self.bind_all("<Control-r>", self.run)
+
     def run(self,e=None):
         self.app = App(self,)
         self.pw.add(self.app)
+
+
 class App(Frame):
     def __init__(self,parent,):
         super().__init__(parent,)
@@ -34,9 +40,13 @@ class Console(Frame):
         super().__init__(parent, )
         self.master = parent
         self.configure(bg="#202124")
-        self.ttyText = Text(self,fg="#DDD",blockcursor=True,bg="#222",cursor="pencil",font=("VictorMono",16),highlightbackground="#444",highlightcolor="#2BCDBB",insertbackground="red",relief="flat",padx=20,pady=20,wrap="word",height=18)
+
+        self.ttyText = Text(self,fg="#DDD",blockcursor=True,bg="#222",cursor="pencil",
+                            font=("VictorMono",16),highlightbackground="#444",highlightcolor="#2BCDBB",
+                            insertbackground="red",relief="flat",padx=20,pady=20,wrap="word",height=18)
         self.tagConf()
         self.ttyText.bind("<Return>", self.enter)
+        self.ttyText.bind("<KeyRelease>", self.doSyntax)
         self.ttyText.pack(expand=1,fill="both",padx=3,pady=3,)
         self.p = subprocess.Popen(com,stdout=subprocess.PIPE,stdin=subprocess.PIPE,stderr=subprocess.PIPE)
         self.outQueue = queue.Queue()
@@ -55,7 +65,6 @@ class Console(Frame):
         Frame.destroy(self)
 
     def enter(self,e):
-        self.doSyntax()
         string = self.ttyText.get(1.0,"end")[self.linestart:]
         self.linestart += len(string)
         self.p.stdin.write(string.encode())
@@ -65,7 +74,7 @@ class Console(Frame):
         while self.alive:
            data = self.p.stdout.raw.read(1024).decode()
            self.outQueue.put(data)
-
+    
     def readFromProccessErr(self,):
         while self.alive:
            data = self.p.stderr.raw.read(1024).decode()
@@ -78,6 +87,7 @@ class Console(Frame):
            self.write(self.outQueue.get())
         if self.alive:
            self.after(10,self.writeLoop)
+
 
     def write(self,string):
         self.ttyText.insert("end", f"{string}")
@@ -165,14 +175,22 @@ class SrcPad(Frame):
         super().__init__(parent,)
         self.master = parent
         self.configure(bg="#202124")
-        self.srcTxt = Text(self,fg="#DDD",blockcursor=True,bg="#222",cursor="pencil",font=("VictorMono",16),highlightbackground="#444",highlightcolor="#2BCDBB",insertbackground="red",relief="flat",padx=20,pady=20,undo=True,wrap="word")
+
+        self.srcTxt = Text(self,fg="#DDD",blockcursor=True,bg="#222",cursor="pencil",
+                           font=("VictorMono",16),highlightbackground="#444",highlightcolor="#2BCDBB",
+                           insertbackground="red",relief="flat",padx=20,pady=20,undo=True,wrap="word")
         self.srcTxt.pack(expand=1,fill="both",padx=5,pady=5,)
+
         self.srcTxt.bind("<Shift_R>", self.synThd)
         self.srcTxt.bind("<Shift-Return>", self.add_indent)
+        self.srcTxt.bind("<Control-Return>", self.stay_indent)
         self.srcTxt.bind("<Control-l>", self.cleartxt)
         self.srcTxt.bind("<Escape>", self.myExit)
-        self.comEntry = Entry(self,fg="#DDD",bg="#202124",cursor="shuttle",font=("VictorMono",16),highlightbackground="#444",highlightcolor="#222",insertbackground="red",relief="flat")
+
+        self.comEntry = Entry(self,fg="#DDD",bg="#202124",cursor="shuttle",font=("VictorMono",16),
+                              highlightbackground="#444",highlightcolor="#222",insertbackground="red",relief="flat")
         self.comEntry.pack(expand=0,fill="x",padx=5,pady=5,)
+
         self.comEntry.bind("<Return>", self.cliSh)
         self.comEntry.bind("<Escape>", self.cliclr)
         self.tagConf()
@@ -181,19 +199,30 @@ class SrcPad(Frame):
     def add_indent(self, event):
         text = self.srcTxt
         line = text.get("insert linestart", "insert")
-        match = re.match(r"^(\s+)", line)
-        whitespace = match.group(0) if match else ""
+        m = match(r"^(\s+)", line)
+        whitespace = m.group(0) if m else ""
+        text.insert("insert", f"\n    {whitespace}")
+        return "break"
+
+    def stay_indent(self, event):
+        text = self.srcTxt
+        line = text.get("insert linestart", "insert")
+        m = match(r"^(\s+)", line)
+        whitespace = m.group(0) if m else ""
         text.insert("insert", f"\n{whitespace}")
         return "break"
 
     def thdStart(self,x,e=None):
         self.x = x
-        thd = Thread(target=x)
+        thd = Thread(target=x,daemon=True)
         thd.start()
+
     def cliclr(self,e=None):
         self.comEntry.delete(0,"end")
+
     def myExit(self,e=None):
         self.comEntry.focus()
+
     def cliSh(self,e=None):
         line = self.comEntry.get()
         tt = line.split()
@@ -210,13 +239,17 @@ class SrcPad(Frame):
             self.compile()
         elif tt[0] == "s":
             self.mapitOut()
+
     def clearOut(self,e=None):
         self.iShOut.destroy()
         self.comEntry.focus()
+
     def compile(self,e=None):
         self.thdStart(self.redc)
+
     def mapitOut(self,e=None):
         self.thdStart(self.shell)
+
     def shell(self,e=None):
         line = self.comEntry.get()
         tt = line.split()
@@ -233,6 +266,7 @@ class SrcPad(Frame):
                 self.iShOut.txt.insert("1.0",f"#$%&*^ #$%&*^ {datetime.datetime.now().strftime('<%m.%d.%Y.%H:%M>')} {result.stderr}\n")
         except Exception as e:
             self.iShOut.txt.insert("1.0",f"#$%&*^ #$%&*^ {datetime.datetime.now().strftime('<%m.%d.%Y.%H:%M>')} {str(e)}\n")
+
     def redc(self,e=None):
         self.cliclr()
         self.iShOut = ShOut(self,)
@@ -395,6 +429,5 @@ if __name__ == '__main__':
     go = Red()
     go.title("red-ide")
     go.mainloop()
-
 
 
