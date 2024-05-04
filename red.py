@@ -25,6 +25,7 @@ class Red(Tk):
 
 
 class App(Frame):
+
     def __init__(self,parent,):
         super().__init__(parent,)
         self.master = parent
@@ -36,6 +37,7 @@ class App(Frame):
 
 
 class Console(Frame):
+
     def __init__(self, parent, com):
         super().__init__(parent, )
         self.master = parent
@@ -429,5 +431,6 @@ if __name__ == '__main__':
     go = Red()
     go.title("red-ide")
     go.mainloop()
+
 
 
