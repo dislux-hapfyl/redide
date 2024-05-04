@@ -17,7 +17,7 @@ class Red(Tk):
         self.pw.pack(expand=1,fill="both",padx=5,pady=5,)
         self.pw.pack(expand=1,fill="both",padx=5,pady=5,)
         self.run()
-        self.bind_all("<Control-r>", self.run)
+        self.bind_all("<Control-R>", self.run)
 
     def run(self,e=None):
         self.app = App(self,)
@@ -431,6 +431,5 @@ if __name__ == '__main__':
     go = Red()
     go.title("red-ide")
     go.mainloop()
-
 
 
