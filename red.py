@@ -32,144 +32,6 @@ class App(Frame):
         self.configure(bg="#202124")
         self.iSrcPad = SrcPad(self,)
         self.iSrcPad.pack(expand=1,fill="both",padx=5,pady=5,)
-        self.iConsole = Console(self,"red")
-        self.iConsole.pack(expand=1,fill="both",padx=5,pady=5,)
-
-
-class Console(Frame):
-
-    def __init__(self, parent, com):
-        super().__init__(parent, )
-        self.master = parent
-        self.configure(bg="#202124")
-
-        self.ttyText = Text(self,fg="#DDD",blockcursor=True,bg="#222",cursor="pencil",
-                            font=("VictorMono",16),highlightbackground="#444",highlightcolor="#2BCDBB",
-                            insertbackground="red",relief="flat",padx=20,pady=20,wrap="word",height=18,width=132)
-        self.ttyText.pack(expand=1,fill="y",padx=5,pady=5,)
-        self.tagConf()
-        self.ttyText.bind("<Return>", self.enter)
-        self.ttyText.bind("<KeyRelease>", self.doSyntax)
-        self.p = subprocess.Popen(com,stdout=subprocess.PIPE,stdin=subprocess.PIPE,stderr=subprocess.PIPE)
-        self.outQueue = queue.Queue()
-        self.errQueue = queue.Queue()
-        self.linestart = 0
-        self.alive = True
-        Thread(target=self.readFromProccessOut,daemon=True).start()
-        Thread(target=self.readFromProccessErr,daemon=True).start()
-        self.writeLoop()
-
-    def destroy(self,event=None):
-        self.alive = False
-        self.p.stdin.write("exit()\n".encode())
-        self.p.stdin.flush()
-        self.ttyText.destroy()
-        Frame.destroy(self)
-
-    def enter(self,e):
-        string = self.ttyText.get(1.0,"end")[self.linestart:]
-        self.linestart += len(string)
-        self.p.stdin.write(string.encode())
-        self.p.stdin.flush()
-
-    def readFromProccessOut(self,):
-        while self.alive:
-           data = self.p.stdout.raw.read(1024).decode()
-           self.outQueue.put(data)
-    
-    def readFromProccessErr(self,):
-        while self.alive:
-           data = self.p.stderr.raw.read(1024).decode()
-           self.errQueue.put(data)
-
-    def writeLoop(self,):
-        if not self.errQueue.empty():
-           self.write(self.errQueue.get())
-        if not self.outQueue.empty():
-           self.write(self.outQueue.get())
-        if self.alive:
-           self.after(10,self.writeLoop)
-
-    def write(self,string):
-        self.ttyText.insert("end", f"{string}")
-        self.ttyText.see("end")
-        self.linestart += len(string)
-
-    def doSyntax(self,e=None):
-        self.syntax(self.ttyText)
-
-    def tagConf(self,e=None):
-        d = { "arg": ("#333", "#eccca2"), "args": ("#444", "#eccca2"), "brc": ("#222", "red"), "brcc": ("#222", "blue"), "paren": ("#222", "orange"), "slash": ("#222", "green"), "parenn": ("#222", "yellow"), "crlb": ("#444", "#eccca2"), "hash": ("#222", "magenta"), "col": ("#222", "#00ffff"), "eql": ("#222", "#00ffff"),"dash": ("#222", "#00ffff"), "pls": ("#222", "yellow"), "star": ("#222", "#bfff00"), "qs": ("#222", "#bfff00"), "dol": ("#222", "green"), "exc": ("#222", "orange"), "nnn": ("#222","orange"),"pct": ("#222","purple"),}
-        for key,value in d.items():
-            self.ttyText.tag_configure(key,background=value[0],foreground=value[1])
-
-    def tagg(self,x,y,a,b,e=None):
-        self.x = x
-        self.y = y
-        self.a = a
-        self.b = b
-        self.x.tag_add(y,f"1.0+{a}c",f"1.0+{b}c")
-
-    def syntax(self,xx,e=None):
-        self.xx = xx
-        data = self.xx.get("1.0","end-1c")
-        args_idx = [(m.start(),m.end()) for m in finditer(r'\"(.*?)\"', data)]
-        for start,end in args_idx:
-            self.tagg(xx,"args",start,end)
-        arg_idx = [(m.start(),m.end()) for m in finditer(r'\'', data)]
-        for start,end in arg_idx:
-            self.tagg(xx,"arg",start,end)
-        crlb_idx = [(m.start(),m.end()) for m in finditer(r'\{(.*?)\}', data)]
-        for start,end in crlb_idx:
-            self.tagg(xx,"crlb",start,end)
-        brc_idx = [(m.start(),m.end()) for m in finditer(r'\[', data)]
-        for start,end in brc_idx:
-            self.tagg(xx,"brc",start,end)
-        paren_idx = [(m.start(),m.end()) for m in finditer(r'\(', data)]
-        for start,end in paren_idx:
-            self.tagg(xx,"paren",start,end)
-        parenn_idx = [(m.start(),m.end()) for m in finditer(r'\)', data)]
-        for start,end in parenn_idx:
-            self.tagg(xx,"parenn",start,end)
-        slash_idx = [(m.start(),m.end()) for m in finditer(r'\/', data)]
-        for start,end in slash_idx:
-            self.tagg(xx,"slash",start,end)
-        brcc_idx = [(m.start(),m.end()) for m in finditer(r'\]', data)]
-        for start,end in brcc_idx:
-            self.tagg(xx,"brcc",start,end)
-        hash_idx = [(m.start(),m.end()) for m in finditer(r'#', data)]
-        for start,end in hash_idx:
-            self.tagg(xx,"hash",start,end)
-        col_idx = [(m.start(),m.end()) for m in finditer(r':', data)]
-        for start,end in col_idx:
-            self.tagg(xx,"col",start,end)
-        dash_idx = [(m.start(),m.end()) for m in finditer(r'-', data)]
-        for start,end in dash_idx:
-            self.tagg(xx,"dash",start,end)
-        eql_idx = [(m.start(),m.end()) for m in finditer(r'=', data)]
-        for start,end in eql_idx:
-            self.tagg(xx,"eql",start,end)
-        pls_idx = [(m.start(),m.end()) for m in finditer(r'\+', data)]
-        for start,end in pls_idx:
-            self.tagg(xx,"pls",start,end)
-        star_idx = [(m.start(),m.end()) for m in finditer(r'\*', data)]
-        for start,end in star_idx:
-            self.tagg(xx,"star",start,end)
-        qs_idx = [(m.start(),m.end()) for m in finditer(r'\?', data)]
-        for start,end in qs_idx:
-            self.tagg(xx,"qs",start,end)
-        dol_idx = [(m.start(),m.end()) for m in finditer(r'\$', data)]
-        for start,end in dol_idx:
-            self.tagg(xx,"dol",start,end)
-        exc_idx = [(m.start(),m.end()) for m in finditer(r'!', data)]
-        for start,end in exc_idx:
-            self.tagg(xx,"exc",start,end)
-        nnn_idx = [(m.start(),m.end()) for m in finditer(r'~', data)]
-        for start,end in nnn_idx:
-            self.tagg(xx,"nnn",start,end)
-        pct_idx = [(m.start(),m.end()) for m in finditer(r'%', data)]
-        for start,end in pct_idx:
-            self.tagg(xx,"pct",start,end)
 
 class SrcPad(Frame):
     def __init__(self,parent,):
@@ -218,6 +80,9 @@ class SrcPad(Frame):
         thd = Thread(target=x,daemon=True)
         thd.start()
 
+    def mapitOut(self,e=None):
+        self.thdStart(self.shell)
+
     def cliclr(self,e=None):
         self.comEntry.delete(0,"end")
 
@@ -247,9 +112,6 @@ class SrcPad(Frame):
 
     def compile(self,e=None):
         self.thdStart(self.redc)
-
-    def mapitOut(self,e=None):
-        self.thdStart(self.shell)
 
     def shell(self,e=None):
         line = self.comEntry.get()
@@ -427,4 +289,7 @@ if __name__ == '__main__':
     go = Red()
     go.title("red-ide")
     go.mainloop()
+
+
+
 
