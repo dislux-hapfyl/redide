@@ -6,13 +6,10 @@ red-lang ide made in Python
 
 - Basic Syntax Highlight
 
-- Compiles
 
-- Interpreter
+Depends: `bash, Python3, tkinter, tcl/tk` Linux environment [Windows under a VM] ;)
 
-Depends: `red, redc, bash, Python3, tkinter, tcl/tk` Linux environment [Windows under a VM] ;)
-
-The red interpreter and compiler should be in your path named `red` and `redc`. Mine is in `/usr/local/bin/` and also `Bash` is required if you wan access to the internal shell. *You can edit the subprocess code in the file to your shell of preference.* `sed -i 's|"/bin/bash"|"/your/shell"|g' red.py`
+`Bash` is required if you wan access to the internal shell. *You can edit the subprocess code in the file to your shell of preference.* `sed -i 's|"/bin/bash"|"/your/shell"|g' red.py`
 
 # HOWTO
 
@@ -20,13 +17,11 @@ The red interpreter and compiler should be in your path named `red` and `redc`. 
 
 *Ctrl-R* Creates new workarea. Watch for the dark bar appear on the right. Dual side arrow cursor appears clik and drag to pane window.
 
-Internal Commands are singel character:  `d c o w s` 
+Internal Commands are singel character:  `d o w s` 
 
 *Return* execute internal commands like a normal shell
 
 `d` clear all
-
-`c` compile opened or saved file
 
 `o [filename]` opens a file in current path
 
