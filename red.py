@@ -3,7 +3,6 @@
 from tkinter import Tk,Frame,Text,Entry,PanedWindow
 from re import finditer,match
 from threading import Thread
-import queue
 import subprocess
 import datetime
 
