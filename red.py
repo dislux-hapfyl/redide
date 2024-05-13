@@ -180,7 +180,7 @@ class SrcPad(Frame):
         self.syntax(self.srcTxt)
 
     def tagConf(self,e=None):
-        d = { "arg": ("#333", "#eccca2"), "args": ("#444", "#eccca2"), "brc": ("#222", "red"), "brcc": ("#222", "blue"), "paren": ("#222", "orange"), "slash": ("#222", "green"), "parenn": ("#222", "yellow"), "crlb": ("#444", "#eccca2"), "hash": ("#222", "magenta"), "col": ("#222", "#00ffff"), "eql": ("#222", "#00ffff"),"dash": ("#222", "#00ffff"),"larr": ("#222", "red"),"rarr": ("#222", "blue"), "pls": ("#222", "#bfff00"), "star": ("#222", "#bfff00"), "qs": ("#222", "#bfff00"), "dol": ("#222", "green"), "exc": ("#222", "orange"), "nnn": ("#222","orange"), "pct": ("#222","purple"), "smcl": ("#222", "#bfff00"), "dot": ("#222", "pink"), "cm": ("#222", "cyan"), "upar": ("#222", "cyan"), "spc": ("#333", "#333"),}
+        d = { "arg": ("#333", "#eccca2"), "args": ("#444", "#eccca2"), "brc": ("#222", "red"), "brcc": ("#222", "blue"), "paren": ("#222", "orange"), "slash": ("#222", "green"), "parenn": ("#222", "yellow"), "crlb": ("#444", "#eccca2"), "hash": ("#222", "magenta"), "col": ("#222", "#00ffff"), "eql": ("#222", "#00ffff"),"dash": ("#222", "#00ffff"),"larr": ("#222", "red"),"rarr": ("#222", "blue"), "pls": ("#222", "#bfff00"), "star": ("#222", "#bfff00"), "qs": ("#222", "#bfff00"), "dol": ("#222", "green"), "exc": ("#222", "orange"), "nnn": ("#222","orange"), "pct": ("#222","purple"), "smcl": ("#222", "#bfff00"), "dot": ("#222", "pink"), "cm": ("#222", "cyan"), "upar": ("#222", "cyan"),}
         for key,value in d.items():
             self.srcTxt.tag_configure(key,background=value[0],foreground=value[1])
 
@@ -272,9 +272,7 @@ class SrcPad(Frame):
         upar_idx = [(m.start(),m.end()) for m in finditer(r'\^', data)]
         for start,end in upar_idx:
             self.tagg(xx,"upar",start,end)
-        spc_idx = [(m.start(),m.end()) for m in finditer(r' ', data)]
-        for start,end in spc_idx:
-            self.tagg(xx,"spc",start,end)
+
 
 class ShOut(Frame):
     def __init__(self,parent,):
